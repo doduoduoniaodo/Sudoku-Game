@@ -144,7 +144,7 @@ def Enter_answer_9x9():
 so that each column, each row, and each of the nine 3 x 3 subgrids
 that compose the grid contains all of the digits from 1 to 9.''', fg='#05423e', font=('Kristen ITC', 10), bg='#cee6f5')
     label_objective.pack()
-    label_blank = Label(enterwindow9x9, text="Enter your answer", bg='#98a2af', font=('Consolas', 10))
+    label_blank = Label(enterwindow9x9, text="Enter your solution", bg='#98a2af', font=('Consolas', 10))
     label_blank2 = Label(enterwindow9x9, text="Don't leave any entry box blank", fg='red', bg='#98a2af', font=('Consolas', 10))
     label_blank.pack()
     label_blank2.pack()
