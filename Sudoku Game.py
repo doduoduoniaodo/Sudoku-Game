@@ -242,6 +242,14 @@ def Correct():
     # destroy other Toplevels
     show_sudoku.destroy()
     enterwindow9x9.destroy()
+    try:
+        theanswertoplevel.destroy()
+    except:
+        None
+    try:
+        wronganswer.destroy()
+    except:
+        None
 
 
 # check if the user answer the math question correctly
