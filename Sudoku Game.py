@@ -1,15 +1,13 @@
-#Name: Qianyi Ma
-#Purpose: Sudoku Game
-
 from tkinter import *
 import tkinter.messagebox
 from PIL import Image, ImageTk
 import random
+from copy import deepcopy
 
 # create a window (instructions)
 window1 = Tk()
 window1.title('Sudoku Game')
-window1.geometry('400x400')
+window1.geometry('400x500')
 window1.config(background='#98a2af')
 
 # create a menubar for user to quit the program
@@ -38,81 +36,114 @@ instruction1.pack()
 
 # create a IntVar to store the user's choice
 userchoice = IntVar()
-userchoice.set(1)
+userchoice.set(30)
 
-# create two radio buttons for the user to select whether 4x4 or 9x9 Sudoku
-radiobutton4x4 = Radiobutton(middleframe, text='4 x 4', variable=userchoice, value=1)
-radiobutton9x9 = Radiobutton(middleframe, text='9 x 9', variable=userchoice, value=2)
-radiobutton4x4.pack()
-radiobutton9x9.pack()
+thinkingface = ImageTk.PhotoImage(Image.open('Thinking_Face_Emoji.png').resize((32, 32), Image.NEAREST))
+
+# create radio buttons for the user to select the difficulty
+# Easy: 30
+# Medium: 70
+# Challenging: 100
+# Difficult: 150
+# 🤔: 300
+radiobutton1 = Radiobutton(middleframe, text='Easy', variable=userchoice, value=30, bg='#98a2af')
+radiobutton2 = Radiobutton(middleframe, text='Medium', variable=userchoice, value=70, bg='#98a2af')
+radiobutton3 = Radiobutton(middleframe, text='Challenging', variable=userchoice, value=100, bg='#98a2af')
+radiobutton4 = Radiobutton(middleframe, text='Difficult', variable=userchoice, value=150, bg='#98a2af')
+radiobutton5 = Radiobutton(middleframe, image=thinkingface, variable=userchoice, value=300, bg='#98a2af')
+radiobutton1.pack()
+radiobutton2.pack()
+radiobutton3.pack()
+radiobutton4.pack()
+radiobutton5.pack()
 
 # record how many sudoku the user solved
 totalsolved = 0
 
 
+def is_valid(board, row, col, num):
+    # Check if rows are duplicated
+    for x in range(9):
+        if board[row][x] == num:
+            return False
+    # Check if columns are duplicated
+    for x in range(9):
+        if board[x][col] == num:
+            return False
+    # Check if there are duplicates in 3*3 squares
+    start_row, start_col = row - row%3, col - col%3
+    for i in range(3):
+        for j in range(3):
+            if board[i+start_row][j+start_col] == num:
+                return False
+    return True
+
+def solve_sudoku(board):
+    for i in range(9):
+        for j in range(9):
+            if board[i][j] == 0:
+                for num in range(1,10):
+                    if is_valid(board, i, j, num):
+                        board[i][j] = num
+                        if solve_sudoku(board):
+                            return True
+                        board[i][j] = 0
+                return False
+    return True
+
+def print_board(board):
+    for i in range(9):
+        for j in range(9):
+            print(board[i][j], end=' ')
+        print()
+
 # display random sudoku
 def Show_Sudoku():
-    global random4x4, random9x9, image4x4, image9x9, theuserchoice, show_sudoku_image
+    global theuserchoice, show_sudoku, theanswer
     # create a new window
-    show_sudoku_image = Toplevel()
+    show_sudoku = Toplevel()
     
     # topmost
-    show_sudoku_image.attributes('-topmost', 'true')
+    show_sudoku.attributes('-topmost', 'true')
     
     # store the user-selected Sudoku type
     theuserchoice = userchoice.get()
     
-    # According to the user's choice, display a random sudoku
-    if theuserchoice == 1:
-        random4x4 = str(random.randint(1, 12))
-        image4x4 = ImageTk.PhotoImage(Image.open(rf'4x4\q{random4x4}.png'))
-        image_label_4x4 = Label(show_sudoku_image, image=image4x4)
-        image_label_4x4.pack()
-        Enter_Answer_4x4()
-        
-    else:
-        random9x9 = str(random.randint(1, 12))
-        image9x9 = ImageTk.PhotoImage(Image.open(rf'9x9\q{random9x9}.png'))
-        image_label_9x9 = Label(show_sudoku_image, image=image9x9)
-        image_label_9x9.pack()
-        Enter_answer_9x9()
+    # Initialize an empty 9x9 Sudoku board
+    board = [[0]*9 for _ in range(9)]
 
+    # Generate a complete Sudoku solution
+    solve_sudoku(board)
 
-# user input the answer (4x4)
-def Enter_Answer_4x4():
-    global entries_4x4, enterwindow4x4
-    # create a new window
-    enterwindow4x4 = Toplevel()
-    enterwindow4x4.config(background='#98a2af')
+    theanswer = deepcopy(board)
+    print(theanswer)
     
-    # topmost
-    enterwindow4x4.attributes('-topmost', 'true')
+    # Randomly remove some numbers to generate questions
+    for _ in range(theuserchoice):
+        i, j = random.randint(0, 8), random.randint(0, 8)
+        board[i][j] = 0
+
+    canvas = Canvas(show_sudoku, width=450, height=450)
+    canvas.pack()
     
-    # instructions
-    label_objective = Label(enterwindow4x4, text='''Objective: to fill a 4 x 4 grid with digits
-so that each column, each row, and each of the nine 2 x 2 subgrids
-that compose the grid contains all of the digits from 1 to 4.''', fg='#05423e', font=('Kristen ITC', 10), bg='#cee6f5')
-    label_objective.pack()
-    label_blank = Label(enterwindow4x4, text="Enter your answer", bg='#98a2af', font=('Consolas', 10))
-    label_blank2 = Label(enterwindow4x4, text="Don't leave any entry box blank", fg='red', bg='#98a2af', font=('Consolas', 10))
-    label_blank.pack()
-    label_blank2.pack()
+    for i in range(9):
+        for j in range(9):
+            x = 50 * j
+            y = 50 * i
+            if i % 3 == 0:
+                canvas.create_line(x, y, x + 450, y, width=2)
+            if j % 3 == 0:
+                canvas.create_line(x, y, x, y + 450, width=2)
+            canvas.create_rectangle(x, y, x + 50, y + 50)
+            if board[i][j] != 0:
+                canvas.create_text(x + 25, y + 25, text=str(board[i][j]))
+
+    canvas.create_line(4, 4, 450, 4, width=2)
+    canvas.create_line(4, 4, 4, 450, width=2)
+    canvas.create_line(450, 0, 450, 450, width=2)
+    canvas.create_line(0, 450, 450, 450, width=2)
     
-    # create 4 by 4 entry boxes
-    entries_4x4 = []
-    for i in range(4):
-        tempframe = Frame(enterwindow4x4)
-        tempframe.pack()
-        temp = []
-        for j in range(4):
-            entry = Entry(tempframe, width=3, justify='center')
-            entry.pack(side=LEFT)
-            temp.append(entry)
-        entries_4x4.append(temp)
-    
-    # create a submit button
-    submitanswer = Button(enterwindow4x4, text='Submit Answer', command=Check_Answer_4x4, bg='#bad1db', font=('Consolas', 10))
-    submitanswer.pack()
+    Enter_answer_9x9()
 
 
 # user input the answer (9x9)
@@ -152,59 +183,6 @@ that compose the grid contains all of the digits from 1 to 9.''', fg='#05423e', 
     submitanswer.pack()
 
 
-# check the user's answer (4x4)
-# if the user's answer is incorrect, call Wrong() function
-# if the user's answer is correct, call Correct() function
-def Check_Answer_4x4():
-    # get the numbers from those entry boxes
-    sudoku_grid_4x4 = []
-    for i in entries_4x4:
-        temp = []
-        for j in i:
-            temp.append(j.get().strip())
-        sudoku_grid_4x4.append(temp)
-    
-    # input validation
-    for i in range(4):
-        for j in range(4):
-            if sudoku_grid_4x4[i][j].isdigit() == False or int(sudoku_grid_4x4[i][j]) > 4 or int(sudoku_grid_4x4[i][j]) < 1:
-                tkinter.messagebox.showerror('Invalid input', 'Please enter valid values')
-                cancontinue = False
-                return
-    
-    # Check if each row has no repeated number
-    for x in range(4):
-        temp = set()
-        for y in range(4):
-            temp.add(sudoku_grid_4x4[y][x])
-        if len(temp) != 4:
-            Wrong()
-            return
-    
-    # Check if each column has no repeated number
-    for x in range(4):
-        temp = set(sudoku_grid_4x4[x])
-        if len(temp) != 4:
-            Wrong()
-            return
-
-    # Check if each smaller 2x2 square has no repeated number
-    for x in range(0, 3, 2):
-        for y in range(0, 3, 2):
-            temp = set()
-            temp.add(sudoku_grid_4x4[x][y])
-            temp.add(sudoku_grid_4x4[x][y+1])
-
-            temp.add(sudoku_grid_4x4[x+1][y])
-            temp.add(sudoku_grid_4x4[x+1][y+1])
-            
-            if len(temp) != 4:
-                Wrong()
-                return
-    
-    # if the user answer correctly, call Correct() function
-    Correct(1)
-    return
 
 
 # check the user's answer (9x9)
@@ -265,12 +243,12 @@ def Check_Answer_9x9():
                 return
     
     # if the user answer correctly, call Correct() function
-    Correct(2)        
+    Correct()        
     return
 
 
 # if the user's answer is correct, create a pop-up window
-def Correct(choice):
+def Correct():
     global totalsolved
     
     # update the numbers of solved sudokus
@@ -281,26 +259,38 @@ def Correct(choice):
     tkinter.messagebox.showinfo('Congratulations', "That's Correct!")
     
     # destroy other Toplevels
-    show_sudoku_image.destroy()
-    if choice == 1:
-        enterwindow4x4.destroy()
-    else:
-        enterwindow9x9.destroy()
+    show_sudoku.destroy()
+    enterwindow9x9.destroy()
 
 
 # check if the user answer the math question correctly
 def Check_Math():
-    global answer
+    global theanswertoplevel
     # if the answer is correct, show the correct answer of the sudoku
     if float(questionentry.get()) == mathquestions[randomquestion]:
-        if theuserchoice == 1:
-            answer = ImageTk.PhotoImage(Image.open(rf'4x4\a{random4x4}.png'))
-            image_label_4x4 = Label(wronganswer, image=answer)
-            image_label_4x4.pack()
-        else:
-            answer = ImageTk.PhotoImage(Image.open(rf'9x9\a{random4x4}.png'))
-            image_label_9x9 = Label(wronganswer, image=answer)
-            image_label_9x9.pack()
+        theanswertoplevel = Toplevel()
+        theanswertoplevel.title('Answer')
+        theanswertoplevel.attributes('-topmost', 'true')
+        
+        canvas = Canvas(theanswertoplevel, width=450, height=450)
+        canvas.pack()
+        
+        for i in range(9):
+            for j in range(9):
+                x = 50 * j
+                y = 50 * i
+                if i % 3 == 0:
+                    canvas.create_line(x, y, x + 450, y, width=2)
+                if j % 3 == 0:
+                    canvas.create_line(x, y, x, y + 450, width=2)
+                canvas.create_rectangle(x, y, x + 50, y + 50)
+                if theanswer[i][j] != 0:
+                    canvas.create_text(x + 25, y + 25, text=str(theanswer[i][j]))
+
+        canvas.create_line(4, 4, 450, 4, width=2)
+        canvas.create_line(4, 4, 4, 450, width=2)
+        canvas.create_line(450, 0, 450, 450, width=2)
+        canvas.create_line(0, 450, 450, 450, width=2)
             
     # otherwise, let the user try again
     else:
@@ -311,11 +301,9 @@ def Check_Math():
 # a function for destroying Toplevels
 def windowdestroy():
     wronganswer.destroy()
-    if theuserchoice == 1:
-        enterwindow4x4.destroy()
-    else:
-        enterwindow9x9.destroy()
-    show_sudoku_image.destroy()
+    enterwindow9x9.destroy()
+    show_sudoku.destroy()
+    theanswertoplevel.destroy()
 
 
 # if the user's answer is inccorect
@@ -330,6 +318,7 @@ def Wrong():
     
     # create a new window
     wronganswer = Toplevel()
+    wronganswer.title('Incorrect')
     wronganswer.attributes('-topmost', 'true')
     wronganswer.config(background='#98a2af')
     
@@ -374,7 +363,3 @@ sudokulabel.pack(side=BOTTOM)
 # run the window
 window1.mainloop()
 
-
-# images from: 
-# 1. Google Images
-# 2. https://www.shutterstock.com/en/search/sudoku
