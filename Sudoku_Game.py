@@ -104,6 +104,8 @@ def Show_Sudoku():
         i, j = random.randint(0, 8), random.randint(0, 8)
         board[i][j] = 0
 
+    
+    # display the sudoku grid
     canvas = Canvas(show_sudoku, width=450, height=450)
     canvas.pack()
     
