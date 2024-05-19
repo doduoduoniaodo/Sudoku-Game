@@ -3,6 +3,7 @@ import tkinter.messagebox
 from PIL import Image, ImageTk
 import random
 from copy import deepcopy
+import numpy as np
 
 # create a window (instructions)
 window1 = Tk()
@@ -61,41 +62,24 @@ radiobutton5.pack()
 totalsolved = 0
 
 
-def is_valid(board, row, col, num):
-    # Check if rows are duplicated
-    for x in range(9):
-        if board[row][x] == num:
-            return False
-    # Check if columns are duplicated
-    for x in range(9):
-        if board[x][col] == num:
-            return False
-    # Check if there are duplicates in 3*3 squares
-    start_row, start_col = row - row%3, col - col%3
-    for i in range(3):
-        for j in range(3):
-            if board[i+start_row][j+start_col] == num:
-                return False
-    return True
-
-def solve_sudoku(board):
-    for i in range(9):
-        for j in range(9):
-            if board[i][j] == 0:
-                for num in range(1,10):
-                    if is_valid(board, i, j, num):
-                        board[i][j] = num
-                        if solve_sudoku(board):
-                            return True
-                        board[i][j] = 0
-                return False
-    return True
-
-def print_board(board):
-    for i in range(9):
-        for j in range(9):
-            print(board[i][j], end=' ')
-        print()
+def generate_sudoku():
+    while True:
+        try:
+            matrix = np.zeros((9,9), dtype=int)
+            rows = [set(range(1,10)) for _ in range(9)]
+            columns = [set(range(1,10)) for _ in range(9)]
+            squares = [set(range(1,10)) for _ in range(9)]
+            for i in range(9):
+                for j in range(9):
+                    possibilities = rows[i] & columns[j] & squares[(i//3)*3 + j//3]
+                    choice = random.choice(list(possibilities))
+                    matrix[i,j] = choice
+                    rows[i].remove(choice)
+                    columns[j].remove(choice)
+                    squares[(i//3)*3 + j//3].remove(choice)
+            return matrix
+        except IndexError:
+            continue
 
 # display random sudoku
 def Show_Sudoku():
@@ -108,15 +92,12 @@ def Show_Sudoku():
     
     # store the user-selected Sudoku type
     theuserchoice = userchoice.get()
-    
-    # Initialize an empty 9x9 Sudoku board
-    board = [[0]*9 for _ in range(9)]
 
-    # Generate a complete Sudoku solution
-    solve_sudoku(board)
+    # Generate a random complete Sudoku solution
+    board = generate_sudoku()
 
     theanswer = deepcopy(board)
-    print(theanswer)
+    #print(theanswer)
     
     # Randomly remove some numbers to generate questions
     for _ in range(theuserchoice):
