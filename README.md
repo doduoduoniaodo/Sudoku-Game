@@ -1,1 +1,1 @@
-# Sudoku-Game V2.0
+# Sudoku-Game v2.0
