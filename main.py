@@ -1,18 +1,18 @@
 import random
 
-# 初始化一个空的9x9数独盘
+# Initialize an empty 9x9 Sudoku board
 board = [[0]*9 for _ in range(9)]
 
 def is_valid(board, row, col, num):
-    # 检查行是否有重复
+    # Check if rows are duplicated
     for x in range(9):
         if board[row][x] == num:
             return False
-    # 检查列是否有重复
+    # Check if columns are duplicated
     for x in range(9):
         if board[x][col] == num:
             return False
-    # 检查3*3方块是否有重复
+    # Check if there are duplicates in 3*3 squares
     start_row, start_col = row - row%3, col - col%3
     for i in range(3):
         for j in range(3):
@@ -39,10 +39,10 @@ def print_board(board):
             print(board[i][j], end=' ')
         print()
 
-# 首先，我们生成一个完整的数独解答
+# Generate a complete Sudoku solution
 solve_sudoku(board)
 
-# 然后，我们随机去掉一些数字来生成题目
+# Randomly remove some numbers to generate questions
 # Easy: 30
 # Medium: 70
 # Challenging: 100
