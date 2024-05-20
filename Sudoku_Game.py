@@ -61,7 +61,7 @@ radiobutton5.pack()
 # record how many sudoku the user solved
 totalsolved = 0
 
-
+# generate a random sudoku
 def generate_sudoku():
     while True:
         try:
@@ -185,7 +185,6 @@ def Check_Answer_9x9():
         for j in range(9):
             if sudoku_grid_9x9[i][j].isdigit() == False or int(sudoku_grid_9x9[i][j]) > 9 or int(sudoku_grid_9x9[i][j]) < 1:
                 tkinter.messagebox.showerror('Invalid input', 'Please enter valid values')
-                cancontinue = False
                 return
     
     
@@ -263,6 +262,7 @@ def Check_Math():
         theanswertoplevel.title('Answer')
         theanswertoplevel.attributes('-topmost', 'true')
         
+        # display the solution
         canvas = Canvas(theanswertoplevel, width=450, height=450)
         canvas.pack()
         
