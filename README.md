@@ -24,9 +24,11 @@ pip install -r requirements.txt
 5. Once you finish inputting, click the **"Submit Answer"** button
 6. The program will check whether your answer is correct or not
 
-   6.1. If your answer is correct: _A pop-up Congratulations_
+   6.1. If your answer is correct:
+   - _A pop-up Congratulations_
 
-   6.2. If your answer is incorrect: _Solve a simple math question to see the solution_
+   6.2. If your answer is incorrect:
+   - _Solve a simple math question to see the solution_
 
 
 ## Difficulties
