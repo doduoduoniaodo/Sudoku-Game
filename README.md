@@ -1,6 +1,4 @@
-# Sudoku-Game
-
-Sudoku Game v2.0
+# Sudoku-Game v2.0
 
 A Sudoku Game (9 x 9)
 
